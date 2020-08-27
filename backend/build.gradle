@@ -1,0 +1,63 @@
+plugins {
+    id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.rimple.shoppinglist'
+version = '0.0.2-SNAPSHOT'
+
+ext {
+    springSecurityVersion = '5.3.1.RELEASE'
+    springBootVersion = '2.2.6.RELEASE'
+    jacksonVersion = '2.11.0'
+    awsApiVersion = '2.13.18'
+}
+
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+dependencies {
+
+    // Spring Boot
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.6.2'
+
+
+    // for serializing/deserializing JSON
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+
+    // AWS API
+    implementation platform('software.amazon.awssdk:bom:'+awsApiVersion)
+    implementation 'software.amazon.awssdk:s3'
+
+    // AWS Dynamo
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.848'
+    implementation group: 'com.github.derjust', name: 'spring-data-dynamodb', version: '5.1.0'
+
+    // devtools
+    developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools', version: springBootVersion
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+

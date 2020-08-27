@@ -1,0 +1,135 @@
+AWSTemplateFormatVersion:               "2010-09-09"
+Description:                            "Cypress Test"
+
+Parameters:
+  GitHubProjectUrl:
+    Description:                        "The GitHub Project URL"
+    Type:                               "String"
+
+  CypressBaseUrl:
+    Description:                        "The base URL for the application under test"
+    Type:                               "String"
+
+Resources:
+
+  CypressReportBucket:
+    Type:                               AWS::S3::Bucket
+    Properties:
+      BucketName:                       !Sub "${AWS::StackName}-cypress-reports"
+
+  CypressRole:
+    Type:                               "AWS::IAM::Role"
+    Properties:
+      RoleName:                         !Sub "${AWS::StackName}-CypressRole"
+      AssumeRolePolicyDocument:
+        Version:                        "2012-10-17"
+        Statement:
+          - Effect:                     "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+        - "arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess"
+      Policies:
+        - # For running reports (not working)
+          PolicyName:                   CodeBuildReportPolicy
+          PolicyDocument:
+            Version:                    "2012-10-17"
+            Statement:
+              -
+                Effect:                 "Allow"
+                Resource:               !Sub "arn:aws:codebuild::${AWS::AccountId}:report-group:*"
+                Action:
+                  - "codebuild:CreateReportGroup"
+                  - "codebuild:CreateReport"
+                  - "codebuild:UpdateReport"
+                  - "codebuild:BatchPutTestCases"
+        - # for writing to CloudWatch
+          PolicyName:                   CodeBuildLoggingPolicy
+          PolicyDocument:
+            Version:                    "2012-10-17"
+            Statement:
+              - Effect:                 "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:                "*"
+        - # For uploading artifacts 
+          PolicyName:                   CodeBuildS3ArtifactBucketAccess
+          PolicyDocument:
+            Version:                  "2012-10-17"
+            Statement:
+              - # Static Hosting Bucket upload...
+                Effect:                 "Allow"
+                Action:
+                  - "s3:*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${CypressReportBucket}"
+                  - !Sub "arn:aws:s3:::${CypressReportBucket}/*"
+
+
+  CypressRunner:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:                             !Sub "${AWS::StackName}-cypress-ui"
+      Description:                      Test the application via Cypress
+      ServiceRole:                      !GetAtt CypressRole.Arn
+      TimeoutInMinutes:                 5
+      Artifacts:
+        Type:                           S3
+        NamespaceType:                  BUILD_ID
+        Name:                           "reports.zip"
+        Location:                       !Ref CypressReportBucket
+        Packaging:                      ZIP
+      LogsConfig:
+        CloudWatchLogs:
+          GroupName:                    !Sub "/codebuild/${AWS::StackName}-cypress-logs"
+          Status:                       ENABLED
+          StreamName:                   "ci-log"
+      Environment:
+        Type:                           LINUX_CONTAINER
+        PrivilegedMode:                 true
+        ComputeType:                    BUILD_GENERAL1_SMALL
+        Image:                          aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        EnvironmentVariables:
+          - Name:                       CYPRESS_BASE_URL
+            Value:                      !Ref CypressBaseUrl
+      
+      Source:
+        Auth:
+          Type:                         OAUTH
+        Location:                       !Ref GitHubProjectUrl
+        Type:                           GITHUB
+        GitCloneDepth:                  1
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                nodejs: 12
+            pre_build:
+              commands:
+                - cd cypress-tests
+                - npm install
+            build:
+              commands:
+                - export CONFIG="baseUrl=$CYPRESS_BASE_URL"
+                - echo $CONFIG
+                - NO_COLOR=1 ./node_modules/.bin/cypress run --browser chromium --headless --config "$CONFIG"
+              finally:
+                - npx mochawesome-merge "cypress/reports/separate-reports/*.json" > mochawesome.json
+                - npx marge mochawesome.json
+                - mv mochawesome-report cypress/
+                - ls -R cypress
+
+          artifacts:
+            files:
+              - 'reports/**/*'
+              - 'screenshots/**/*'
+              - 'videos/**/*'
+              - 'mochawesome-report/**/*'
+            base-directory: 'cypress-tests/cypress'

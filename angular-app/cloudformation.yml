@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion:                           "2010-09-09"
+Description:                                        "Self hosted AWS application"
+
+# Directly lifted from https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-s3.html
+# we're just creating an S3 bucket and using it to host a website written in Angular
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Sub "${AWS::StackName}-hosting-bucket"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+    DeletionPolicy: Retain
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub "arn:aws:s3:::${S3Bucket}/*"
+      Bucket: !Ref S3Bucket
+Outputs:
+  WebsiteURL:
+    Value:                      !GetAtt "S3Bucket.WebsiteURL"
+    Description: URL for website hosted on S3
+  S3BucketName:
+    Value: !Ref S3Bucket

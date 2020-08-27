@@ -1,0 +1,39 @@
+logging:
+  level:
+    root: WARN
+    com:
+      rimple:
+        shoppinglist: INFO
+    org:
+      hibernate: WARN
+      springframework: WARN
+
+server:
+  error:
+    include-stacktrace: on_trace_param
+
+#spring:
+#  data:
+#    database: POSTGRES
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#  devtools:
+#    livereload:
+#      # Disable this or you'll take over browser livereload services
+#      # when you start up Angular as spring takes over the livereload
+#      # port..
+#      enabled: false
+#  jpa:
+#    hibernate:
+#      # Switch this between create and validate based on whether you're
+#      # developing JPA objects and need the generation to work or you
+#      # are using a stable JPA build and migrations to do the changes to
+#      # the DDL
+#      ddl-auto: validate
+#    # Currently we turn this off. It is typically different for server-side
+#    # apps where the JSPs might dig into a JPA hydrated object and the team
+#    # decides to let the connection live during view iteration. Not what we
+#    # are doing with a single-page app with a JSON payload
+#    open-in-view: false
+#    show-sql: false
+#

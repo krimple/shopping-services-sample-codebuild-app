@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion:                           "2010-09-09"
+Description:                                        "Self hosted AWS application"
+
+# Directly lifted from https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-s3.html
+# we're just creating an S3 bucket and using it to host a website written in Angular
+Resources:
+   ShoppingListTable:
+     Type: AWS::DynamoDB::Table
+     Properties:
+       AttributeDefinitions:
+         - AttributeName: "OwnerId"
+           AttributeType: "S"
+         - AttributeName: "TaskId"
+           AttributeType: "S"
+         - AttributeName: "Item"
+           AttributeType: "S"
+         - AttributeName: "Picked"
+           AttributeType: "S"
+       TableName: ${AWS::StackName}_shopping_list
+       KeySchema:
+         - AttributeName: "OwnerId"
+           KeyType: "HASH"
+         - AttributeName: "TaskId"
+           KeyType: "RANGE"
+Outputs:
+  TableArn:
+    Value:                      !GetAtt "ShoppingListTable.Arn"

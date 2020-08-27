@@ -1,0 +1,6 @@
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+  }
+}
+rootProject.name = 'rimple-shopping-list-app'
