@@ -9,7 +9,14 @@ public class ShoppingListItem {
     private boolean pickedUp;
 
     public ShoppingListItem(String id, String item, BigDecimal price) {
+        this(item, price);
         this.id = id;
+        this.item = item;
+        this.price = price;
+        this.pickedUp = false;
+    }
+
+    public ShoppingListItem(String item, BigDecimal price) {
         this.item = item;
         this.price = price;
         this.pickedUp = false;

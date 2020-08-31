@@ -10,18 +10,17 @@ Resources:
        AttributeDefinitions:
          - AttributeName: "OwnerId"
            AttributeType: "S"
-         - AttributeName: "TaskId"
+         - AttributeName: "ItemId"
            AttributeType: "S"
-         - AttributeName: "Item"
-           AttributeType: "S"
-         - AttributeName: "Picked"
-           AttributeType: "S"
-       TableName: ${AWS::StackName}_shopping_list
+       TableName: !Sub "${AWS::StackName}ShoppingList"
        KeySchema:
          - AttributeName: "OwnerId"
            KeyType: "HASH"
-         - AttributeName: "TaskId"
+         - AttributeName: "ItemId"
            KeyType: "RANGE"
+       ProvisionedThroughput:
+         ReadCapacityUnits: 2
+         WriteCapacityUnits: 2
 Outputs:
   TableArn:
     Value:                      !GetAtt "ShoppingListTable.Arn"

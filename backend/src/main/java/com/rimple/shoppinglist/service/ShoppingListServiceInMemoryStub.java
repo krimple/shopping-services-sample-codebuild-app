@@ -25,10 +25,11 @@ public class ShoppingListServiceInMemoryStub implements ShoppingListService {
     }
 
     @Override
-    public void addItem(String listKey, ShoppingListItem item) {
+    public String addItem(String listKey, ShoppingListItem item) {
         String itemKey = UUID.randomUUID().toString();
         item.setId(itemKey);
         this.shoppingList.put(itemKey, item);
+        return itemKey;
     }
 
     @Override
@@ -43,6 +44,9 @@ public class ShoppingListServiceInMemoryStub implements ShoppingListService {
 
     @Override
     public void deleteItem(String listKey, String itemKey) {
+        if (!shoppingList.containsKey(itemKey)) {
+            throw new RuntimeException("key not found " + itemKey);
+        }
         shoppingList.remove(itemKey);
     }
 

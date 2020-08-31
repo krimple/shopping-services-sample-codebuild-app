@@ -3,6 +3,7 @@ package com.rimple.shoppinglist.web;
 import com.rimple.shoppinglist.model.ShoppingListItem;
 import com.rimple.shoppinglist.service.ShoppingListService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,8 @@ public class ShoppingListController {
     private ShoppingListService shoppingListService;
 
     @Autowired
-    public ShoppingListController(ShoppingListService shoppingListService) {
+
+    public ShoppingListController(@Qualifier("dynamoDBService") ShoppingListService shoppingListService) {
         this.shoppingListService = shoppingListService;
     }
 

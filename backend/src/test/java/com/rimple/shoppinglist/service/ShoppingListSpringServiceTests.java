@@ -2,10 +2,14 @@ package com.rimple.shoppinglist.service;
 
 
 import com.rimple.shoppinglist.model.ShoppingListItem;
+import org.junit.After;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -16,22 +20,26 @@ import java.math.BigDecimal;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ShoppingListSpringServiceTests {
 
     @Autowired
     private MockMvc mockMvc;
 
+
     @Autowired
+    @Qualifier("dynamoDBService")
     private ShoppingListService shoppingListService;
 
     @Autowired
     private ApplicationContext context;
 
-    @BeforeEach
+    @AfterAll
     void resetList() {
         shoppingListService.removeAllItems("KensList");
 
@@ -48,34 +56,34 @@ public class ShoppingListSpringServiceTests {
 
     @Test
     void testCreateAndFetchItem() {
-        shoppingListService.addItem(
+        String itemKey = shoppingListService.addItem(
                "KensList",
-               new ShoppingListItem("key1", "Eggs", new BigDecimal("3.50")));
-        assertEquals(1, shoppingListService.listItems("KensList").stream().count());
+               new ShoppingListItem("Eggs", new BigDecimal("3.50")));
+        assertNotNull(shoppingListService.getItem("KensList", itemKey));
     }
 
     @Test
     void testCreateAndUpdateAndFetchItem() {
-        shoppingListService.addItem(
+        String itemKey = shoppingListService.addItem(
                 "KensList",
-                new ShoppingListItem("key1", "Eggs", new BigDecimal("3.50")));
+                new ShoppingListItem("Eggs", new BigDecimal("3.50")));
 
         shoppingListService.updateItem("KensList",
-               new ShoppingListItem("key1", "Eggs", new BigDecimal("2.25")));
+               new ShoppingListItem(itemKey, "Eggs", new BigDecimal("2.25")));
 
-        ShoppingListItem item = shoppingListService.getItem("KensList", "key1");
+        ShoppingListItem item = shoppingListService.getItem("KensList", itemKey);
         assertEquals(new BigDecimal("2.25"), item.getPrice());
     }
 
     @Test
     void testDeleteItem() {
-        shoppingListService.addItem(
+        String key = shoppingListService.addItem(
                 "KensList",
-                new ShoppingListItem("key1", "Eggs", new BigDecimal("3.50")));
+                new ShoppingListItem("Eggs", new BigDecimal("3.50")));
 
-        shoppingListService.deleteItem("KensList", "key1");
+        shoppingListService.deleteItem("KensList", key);
 
-        assertEquals(0, shoppingListService.listItems("KensList").stream().count());
+        assertNull(shoppingListService.getItem("KensList", key));
     }
 
 }

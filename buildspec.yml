@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+      nodejs: 12
+  build:
+    commands:
+      - echo 'hi'
+      - cd backend
+      - gradle test
+      - cd ../angular-app
+      - cd angular-app
+      - npm install
+      - npm run test
+      - npm run build
+reports:
+  junitreports:
+    files:
+      - backend/build/test-results/test/*.xml
+
+artifacts:
+  files:
+    - angular-app/dist/angular-app/**
