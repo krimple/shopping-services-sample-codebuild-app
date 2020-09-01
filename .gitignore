@@ -6,4 +6,4 @@ node_modules
 .gradle
 cypress-tests/mochawesome-report
 backend/build/
-
+build

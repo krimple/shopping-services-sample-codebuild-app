@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+  pre_build:
+    run_as:      root
+    commands:
+      - echo > foo
+      - ls -l foo
+      - yum update -y
+      - yum install -y pandoc
+  build:
+    commands:
+      - mkdir -p build
+      - ls -l
+      - pandoc src/content/simpledoc.markdown -o build/simpledoc.html
+artifacts:
+  files:
+    - build/simpledoc.html
