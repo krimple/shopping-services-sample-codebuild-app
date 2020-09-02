@@ -17,16 +17,6 @@ phases:
       - npm run build
     finally:
       - echo 'whether I finished right or not here I am'
-      - echo ${?}
   post_build:
     commands:
-      - echo 'build status'
-      - echo ${?}
-reports:
-  junitreports:
-    files:
-      - backend/build/test-results/test/*.xml
-
-artifacts:
-  files:
-    - angular-app/dist/angular-app/**
+      - echo 'run any report generators...'

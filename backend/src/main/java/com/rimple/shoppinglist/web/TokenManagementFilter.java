@@ -36,14 +36,20 @@ public class TokenManagementFilter implements Filter {
        HttpServletResponse res = (HttpServletResponse) response;
 
        // do we have a shoppingListId UUID cookie?
-       Optional<Cookie> optionalItem =
-               Arrays.stream(req.getCookies())
-                       .filter(cookie -> cookie.getName().equals("shoppingListId"))
-                       .findFirst();
+       Optional<Cookie> optionalItem;
+       var cookies = req.getCookies();
+       if (cookies != null) {
+           optionalItem = Arrays.stream(req.getCookies())
+                   .filter(cookie -> cookie.getName().equals("shoppingListId"))
+                   .findFirst();
+       } else {
+           optionalItem = Optional.empty();
+        }
+
        String uuid;
 
        // if not, create it
-       if (optionalItem.isEmpty()) {
+       if (optionalItem == null || optionalItem.isEmpty()) {
             uuid = UUID.randomUUID().toString();
            res.addCookie(new Cookie("shoppingListId", uuid.toString()));
        } else {

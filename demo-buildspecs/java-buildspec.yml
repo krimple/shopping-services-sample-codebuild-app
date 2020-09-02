@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  build:
+    commands:
+      - cd backend
+      - gradle test
+      - gradle bootJar
+reports:
+  junitreports:
+    files:
+      - backend/build/test-results/test/*.xml
+
+artifacts:
+  files:
+    - backend/build/libs/rimple*.jar
+  name: ApplicationJar
+  discard-paths: yes
