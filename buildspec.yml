@@ -23,4 +23,3 @@ artifacts:
   files:
     - backend/build/libs/rimple*.jar
   name: ApplicationJar
-  discard-paths: yes
