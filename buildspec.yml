@@ -21,4 +21,5 @@ reports:
 
 artifacts:
   files:
+    - backend/build/libs/rimple*.jar
     - angular-app/dist/angular-app/**
